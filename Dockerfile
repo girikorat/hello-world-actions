@@ -5,8 +5,8 @@ COPY ./src /app/src
 WORKDIR /app
 
 # Compile Java into /app/classes
-RUN javac -d classes src/main/java/com/example/HelloWorldServer.java
+RUN javac -d /app/classes src/main/java/com/example/HelloWorldServer.java
 
 # Run the HTTP server
-CMD ["java", "-cp", "classes", "com.example.HelloWorldServer"]
+CMD ["java", "-cp", "/app/classes", "com.example.HelloWorldServer"]
 
