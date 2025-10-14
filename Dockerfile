@@ -11,5 +11,5 @@ COPY src ./src
 RUN javac src/main/java/com/example/HelloWorld.java
 
 # Run Java app
-CMD ["java", "-cp", "src/main/java", "com.example.HelloWorldServer"]
+CMD ["sh", "-c", "java -cp /app/src/main/java com.example.HelloWorld && tail -f /dev/null"]
 
