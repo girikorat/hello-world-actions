@@ -1,12 +1,15 @@
-FROM eclipse-temurin:17-jdk-alpine
+# Use an official OpenJDK image
+FROM openjdk:17
 
-# Copy source code
-COPY ./src /app/src
+# Set working directory inside container
 WORKDIR /app
 
-# Compile Java into /app/classes
-RUN javac -d /app/classes src/main/java/com/example/HelloWorldServer.java
+# Copy Java source code
+COPY src/main/java /app/src/main/java
 
-# Run the HTTP server
+# Compile Java source into /app/classes
+RUN javac -d /app/classes /app/src/main/java/com/example/*.java
+
+# Run the Java application
 CMD ["java", "-cp", "/app/classes", "com.example.HelloWorldServer"]
 
