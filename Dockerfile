@@ -1,15 +1,15 @@
-# Use OpenJDK 17 runtime
+# Use OpenJDK 17
 FROM eclipse-temurin:17-jdk-alpine
 
-# Set working directory
+# Create app directory
 WORKDIR /app
 
-# Copy your Java file
-COPY src/main/java/com/example/HelloWorld.java .
+# Copy Java source
+COPY src ./src
 
-# Compile the Java file
-RUN javac HelloWorld.java
+# Compile Java code
+RUN javac src/main/java/com/example/HelloWorld.java
 
-# Run the Java class
-CMD ["java", "HelloWorld"]
+# Run Java app
+CMD ["java", "-cp", "/app/src/main/java", "com.example.HelloWorld"]
 
