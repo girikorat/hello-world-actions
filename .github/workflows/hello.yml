@@ -55,10 +55,12 @@ jobs:
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
+        shell: bash
 
       # Step 10: Deploy to Kubernetes
       - name: Deploy to Kubernetes
         run: |
-          kubectl set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest --record
-          kubectl rollout status deployment/hello-world-deployment
+          kubectl --kubeconfig $HOME/.kube/config set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest --record
+          kubectl --kubeconfig $HOME/.kube/config rollout status deployment/hello-world-deployment
+        shell: bash
 
