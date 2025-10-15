@@ -1,4 +1,4 @@
-name: Java Hello World CI/CD to kOps
+name: Java Docker Kubernetes Workflow
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
       # Step 1: Checkout your repository code
       - name: Checkout code
@@ -50,30 +49,18 @@ jobs:
         with:
           version: 'latest'
 
-      # Step 9: Install latest kOps CLI dynamically
-      - name: Install latest kOps
-        run: |
-          # Fetch the latest release tag from GitHub
-          LATEST=$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-          echo "Latest kOps version: $LATEST"
-          curl -Lo kops-linux-amd64 https://github.com/kubernetes/kops/releases/download/$LATEST/kops-linux-amd64
-          chmod +x kops-linux-amd64
-          sudo mv kops-linux-amd64 /usr/local/bin/kops
-          kops version
-
-      # Step 10: Configure kubeconfig for kOps
-      - name: Configure kOps kubeconfig
-        env:
-          KOPS_STATE_STORE: ${{ secrets.KOPS_STATE_STORE }}
-          KOPS_CLUSTER_NAME: ${{ secrets.KOPS_CLUSTER_NAME }}
+      # Step 9: Configure kubeconfig
+      - name: Set up Kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          kops export kubecfg --name $KOPS_CLUSTER_NAME
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+        shell: bash
 
-      # Step 11: Deploy to Kubernetes
+      # Step 10: Deploy to Kubernetes
       - name: Deploy to Kubernetes
         run: |
-          kubectl set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest
-          kubectl rollout status deployment/hello-world-deployment
+          kubectl --kubeconfig $HOME/.kube/config set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest --record
+          kubectl --kubeconfig $HOME/.kube/config rollout status deployment/hello-world-deployment
         shell: bash
 
