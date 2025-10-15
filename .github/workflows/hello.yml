@@ -1,11 +1,12 @@
-name: Java Hello World CI/CD
+name: Java Hello World CI/CD to kOps
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -49,18 +50,26 @@ jobs:
         with:
           version: 'latest'
 
-      # Step 9: Configure kubeconfig
-      - name: Set up Kubeconfig
+      # Step 9: Install kops CLI
+      - name: Install kops
+        run: |
+          curl -LO https://github.com/kubernetes/kops/releases/download/v1.33.3/kops-linux-amd64
+          chmod +x kops-linux-amd64
+          sudo mv kops-linux-amd64 /usr/local/bin/kops
+
+      # Step 10: Configure kubeconfig for kOps
+      - name: Configure kOps kubeconfig
+        env:
+          KOPS_STATE_STORE: ${{ secrets.KOPS_STATE_STORE }}
+          KOPS_CLUSTER_NAME: ${{ secrets.KOPS_CLUSTER_NAME }}
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-        shell: bash
+          kops export kubecfg --name $KOPS_CLUSTER_NAME
 
-      # Step 10: Deploy to Kubernetes
+      # Step 11: Deploy to Kubernetes
       - name: Deploy to Kubernetes
         run: |
-          kubectl --kubeconfig $HOME/.kube/config set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest --record
-          kubectl --kubeconfig $HOME/.kube/config rollout status deployment/hello-world-deployment
+          kubectl set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest
+          kubectl rollout status deployment/hello-world-deployment
         shell: bash
 
