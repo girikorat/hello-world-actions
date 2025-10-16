@@ -52,7 +52,7 @@ jobs:
       # Step 9: Add Kubernetes API DNS mapping (Fix for GitHub Actions DNS issue)
       - name: Add Kubernetes API DNS mapping
         run: |
-          echo "3.91.189.117 api.cluster.com" | sudo tee -a /etc/hosts
+          echo "54.197.31.230 api.cluster.com" | sudo tee -a /etc/hosts
           echo "✅ Added DNS mapping for api.cluster.com"
           cat /etc/hosts | grep api.cluster.com
 
