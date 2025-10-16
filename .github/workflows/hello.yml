@@ -49,7 +49,7 @@ jobs:
         with:
           version: 'latest'
 
-      # ✅ Step 9: Add Kubernetes API DNS mapping (Fix for GitHub Actions DNS issue)
+      # Step 9: Add Kubernetes API DNS mapping (Fix for GitHub Actions DNS issue)
       - name: Add Kubernetes API DNS mapping
         run: |
           echo "3.91.189.117 api.cluster.com" | sudo tee -a /etc/hosts
@@ -64,10 +64,10 @@ jobs:
           chmod 600 $HOME/.kube/config
         shell: bash
 
-      # Step 11: Deploy to Kubernetes
+      # Step 11: Apply Kubernetes manifest (deployment + service)
       - name: Deploy to Kubernetes
         run: |
-          kubectl --kubeconfig $HOME/.kube/config --insecure-skip-tls-verify set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest
+          kubectl --kubeconfig $HOME/.kube/config --insecure-skip-tls-verify apply -f k8s-deploy.yml
           kubectl --kubeconfig $HOME/.kube/config --insecure-skip-tls-verify rollout status deployment/hello-world-deployment
         shell: bash
 
