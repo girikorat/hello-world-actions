@@ -1,13 +1,13 @@
-name: Java Docker Kubernetes Workflow
+name: Java Hello World CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       # Step 1: Checkout your repository code
       - name: Checkout code
@@ -49,7 +49,14 @@ jobs:
         with:
           version: 'latest'
 
-      # Step 9: Configure kubeconfig
+      # ✅ Step 9: Add Kubernetes API DNS mapping (Fix for GitHub Actions DNS issue)
+      - name: Add Kubernetes API DNS mapping
+        run: |
+          echo "3.91.189.117 api.cluster.com" | sudo tee -a /etc/hosts
+          echo "✅ Added DNS mapping for api.cluster.com"
+          cat /etc/hosts | grep api.cluster.com
+
+      # Step 10: Configure kubeconfig
       - name: Set up Kubeconfig
         run: |
           mkdir -p $HOME/.kube
@@ -57,10 +64,10 @@ jobs:
           chmod 600 $HOME/.kube/config
         shell: bash
 
-      # Step 10: Deploy to Kubernetes
+      # Step 11: Deploy to Kubernetes
       - name: Deploy to Kubernetes
         run: |
-          kubectl --kubeconfig $HOME/.kube/config set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest --record
+          kubectl --kubeconfig $HOME/.kube/config set image deployment/hello-world-deployment hello-world-container=${{ secrets.DOCKERHUB_USERNAME }}/hello-world-actions:latest
           kubectl --kubeconfig $HOME/.kube/config rollout status deployment/hello-world-deployment
         shell: bash
 
